@@ -1,0 +1,15 @@
+[package]
+name = "async-interval"
+version = "0.0.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2021"
+description = "Async Interval"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/timer-rs"
+homepage = "https://github.com/bk-rs/timer-rs"
+documentation = "https://docs.rs/async-interval"
+keywords = []
+categories = []
+readme = "README.md"
+
+[dependencies]
