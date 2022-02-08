@@ -32,9 +32,7 @@ mod tests {
 
         let now = std::time::Instant::now();
 
-        let ret = st.collect::<Vec<_>>().await;
-
-        assert_eq!(ret, vec![0, 1, 2]);
+        assert_eq!(st.collect::<Vec<_>>().await, vec![0, 1, 2]);
 
         let elapsed_dur = now.elapsed();
         assert!(elapsed_dur.as_millis() >= 300 && elapsed_dur.as_millis() <= 310);
