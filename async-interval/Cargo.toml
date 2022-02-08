@@ -12,4 +12,27 @@ keywords = []
 categories = []
 readme = "README.md"
 
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["impl_tokio", "impl_async_timer"]
+
+impl_tokio = ["tokio", "futures-util"]
+impl_async_timer = ["async-timer"]
+
 [dependencies]
+futures-util = { version = "0.3", default-features = false, optional = true }
+
+tokio = { version = "1.16", default-features = false, features = ["time"], optional = true }
+async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.16", features = ["macros", "rt-multi-thread"] }
+futures-util = { version = "0.3" }
+
+[package.metadata.cargo-all-features]
+skip_optional_dependencies = true
+skip_feature_sets = [
+    ["impl_tokio", "impl_async_timer"],
+]
