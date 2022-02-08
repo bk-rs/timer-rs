@@ -1,7 +1,7 @@
 use core::{future::Future, pin::Pin, time::Duration};
 use std::time::Instant;
 
-use async_io::Timer;
+pub use async_io::Timer;
 use futures_util::StreamExt as _;
 
 use crate::Intervalable;

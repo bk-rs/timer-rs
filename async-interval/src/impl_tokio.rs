@@ -2,7 +2,7 @@ use core::{future::Future, pin::Pin, time::Duration};
 use std::time::Instant;
 
 use futures_util::FutureExt as _;
-use tokio::time::Interval;
+pub use tokio::time::Interval;
 
 use crate::Intervalable;
 
