@@ -1,6 +1,6 @@
 [package]
 name = "async-interval"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2021"
 description = "Async Interval"
@@ -31,7 +31,6 @@ async-io = { version = "1.6", default-features = false, optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.16", features = ["macros", "rt-multi-thread"] }
-futures-util = { version = "0.3" }
 
 [package.metadata.cargo-all-features]
 skip_optional_dependencies = true
