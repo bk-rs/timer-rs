@@ -4,17 +4,17 @@ use std::time::Instant;
 use futures_util::{stream, Stream};
 
 #[cfg(feature = "impl_async_io")]
-mod impl_async_io;
+pub mod impl_async_io;
 #[cfg(feature = "impl_async_timer")]
-mod impl_async_timer;
+pub mod impl_async_timer;
 #[cfg(feature = "impl_tokio")]
-mod impl_tokio;
+pub mod impl_tokio;
 
 //
 pub trait Intervalable {
     fn interval(dur: Duration) -> Self;
 
-    fn xx<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>>;
+    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>>;
 }
 
 /// [Ref](https://docs.rs/futures-util/0.3.21/futures_util/stream/fn.iter.html)
@@ -27,7 +27,7 @@ where
         (iter.into_iter(), interval),
         |(mut iter, mut interval)| async move {
             if let Some(item) = iter.next() {
-                interval.xx().await;
+                interval.wait().await;
                 Some((item, (iter, interval)))
             } else {
                 None
@@ -43,7 +43,7 @@ where
     INTVL: Intervalable,
 {
     stream::unfold((item, interval), |(item, mut interval)| async move {
-        interval.xx().await;
+        interval.wait().await;
         Some((item.clone(), (item, interval)))
     })
 }
@@ -60,7 +60,7 @@ where
     stream::unfold(
         (repeater, interval),
         |(mut repeater, mut interval)| async move {
-            interval.xx().await;
+            interval.wait().await;
             Some((repeater(), (repeater, interval)))
         },
     )

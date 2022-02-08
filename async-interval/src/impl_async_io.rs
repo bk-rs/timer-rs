@@ -12,7 +12,7 @@ impl Intervalable for Timer {
         Self::interval(dur)
     }
 
-    fn xx<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
+    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
         Box::pin(self.next())
     }
 }

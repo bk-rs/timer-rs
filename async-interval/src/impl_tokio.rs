@@ -12,7 +12,7 @@ impl Intervalable for Interval {
         tokio::time::interval(tokio::time::Duration::from_millis(dur.as_millis() as u64))
     }
 
-    fn xx<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
+    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
         self.reset();
         Box::pin(self.tick().map(|x| Some(x.into_std())))
     }
