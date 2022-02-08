@@ -9,7 +9,7 @@ use crate::Intervalable;
 //
 impl Intervalable for Interval {
     fn interval(dur: Duration) -> Self {
-        tokio::time::interval(tokio::time::Duration::from_millis(dur.as_millis() as u64))
+        tokio::time::interval(tokio::time::Duration::from_micros(dur.as_micros() as u64))
     }
 
     fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
