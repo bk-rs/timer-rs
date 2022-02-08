@@ -16,16 +16,18 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["impl_tokio", "impl_async_timer"]
+default = []
 
-impl_tokio = ["tokio", "futures-util"]
+impl_tokio = ["tokio"]
 impl_async_timer = ["async-timer"]
+impl_async_io = ["async-io"]
 
 [dependencies]
-futures-util = { version = "0.3", default-features = false, optional = true }
+futures-util = { version = "0.3", default-features = false }
 
 tokio = { version = "1.16", default-features = false, features = ["time"], optional = true }
 async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
+async-io = { version = "1.6", default-features = false, optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.16", features = ["macros", "rt-multi-thread"] }
@@ -35,4 +37,6 @@ futures-util = { version = "0.3" }
 skip_optional_dependencies = true
 skip_feature_sets = [
     ["impl_tokio", "impl_async_timer"],
+    ["impl_tokio", "impl_async_io"],
+    ["impl_async_timer", "impl_async_io"],
 ]
