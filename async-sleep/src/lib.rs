@@ -1,5 +1,8 @@
 use core::{future::Future, pin::Pin, time::Duration};
 
+#[cfg(feature = "timeout")]
+pub mod timeout;
+
 #[cfg(feature = "impl_async_io")]
 pub mod impl_async_io;
 #[cfg(feature = "impl_async_timer")]
