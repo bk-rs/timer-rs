@@ -6,14 +6,17 @@ use futures_util::future::{self, Either};
 use crate::{sleep, sleep_until, Sleepble};
 
 //
-pub async fn internal_timeout<SLEEP, T>(dur: Duration, future: T) -> Result<T::Output, (Error, T)>
+pub async fn internal_timeout<SLEEP, T>(
+    dur: Duration,
+    future: T,
+) -> Result<T::Output, (Duration, T)>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
     match future::select(future, Box::pin(sleep::<SLEEP>(dur))).await {
         Either::Left((output, _)) => Ok(output),
-        Either::Right((_, future)) => Err((Error::Timeout(dur), future)),
+        Either::Right((_, future)) => Err((dur, future)),
     }
 }
 
@@ -24,20 +27,20 @@ where
 {
     internal_timeout::<SLEEP, _>(dur, future)
         .await
-        .map_err(|(err, _)| err)
+        .map_err(|(dur, _)| Error::Timeout(dur))
 }
 
 pub async fn internal_timeout_at<SLEEP, T>(
     deadline: Instant,
     future: T,
-) -> Result<T::Output, (Error, T)>
+) -> Result<T::Output, (Instant, T)>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
     match future::select(future, Box::pin(sleep_until::<SLEEP>(deadline))).await {
         Either::Left((output, _)) => Ok(output),
-        Either::Right((_, future)) => Err((Error::TimeoutAt(deadline), future)),
+        Either::Right((_, future)) => Err((deadline, future)),
     }
 }
 
@@ -48,7 +51,7 @@ where
 {
     internal_timeout_at::<SLEEP, _>(deadline, future)
         .await
-        .map_err(|(err, _)| err)
+        .map_err(|(instant, _)| Error::TimeoutAt(instant))
 }
 
 //
