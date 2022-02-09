@@ -3,6 +3,8 @@ use std::time::Instant;
 
 #[cfg(feature = "timeout")]
 pub mod timeout;
+#[cfg(feature = "timeout")]
+pub use self::timeout::{timeout, timeout_at};
 
 #[cfg(feature = "impl_async_io")]
 pub mod impl_async_io;
