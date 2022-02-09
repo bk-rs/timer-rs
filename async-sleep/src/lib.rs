@@ -20,14 +20,14 @@ pub trait Sleepble {
     fn wait(self) -> Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
 }
 
-pub async fn sleep<SLEEP>(dur: Duration)
+pub fn sleep<SLEEP>(dur: Duration) -> impl Future<Output = ()>
 where
     SLEEP: Sleepble,
 {
-    SLEEP::sleep(dur).wait().await
+    SLEEP::sleep(dur).wait()
 }
 
-pub async fn sleep_until<SLEEP>(deadline: Instant)
+pub fn sleep_until<SLEEP>(deadline: Instant) -> impl Future<Output = ()>
 where
     SLEEP: Sleepble,
 {
@@ -35,5 +35,5 @@ where
         .checked_duration_since(Instant::now())
         .unwrap_or_default();
 
-    sleep::<SLEEP>(dur).await
+    sleep::<SLEEP>(dur)
 }

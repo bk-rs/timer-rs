@@ -1,56 +1,60 @@
 use core::{fmt, future::Future, time::Duration};
 use std::time::Instant;
 
-use futures_util::future::{self, Either};
+use futures_util::{
+    future::{self, Either},
+    FutureExt as _, TryFutureExt as _,
+};
 
 use crate::{sleep, sleep_until, Sleepble};
 
 //
-pub async fn internal_timeout<SLEEP, T>(
+pub fn internal_timeout<SLEEP, T>(
     dur: Duration,
     future: T,
-) -> Result<T::Output, (Duration, T)>
+) -> impl Future<Output = Result<T::Output, (Duration, T)>>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
-    match future::select(future, Box::pin(sleep::<SLEEP>(dur))).await {
+    future::select(future, Box::pin(sleep::<SLEEP>(dur))).map(move |either| match either {
         Either::Left((output, _)) => Ok(output),
         Either::Right((_, future)) => Err((dur, future)),
-    }
+    })
 }
 
-pub async fn timeout<SLEEP, T>(dur: Duration, future: T) -> Result<T::Output, Error>
+pub fn timeout<SLEEP, T>(dur: Duration, future: T) -> impl Future<Output = Result<T::Output, Error>>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
-    internal_timeout::<SLEEP, _>(dur, future)
-        .await
-        .map_err(|(dur, _)| Error::Timeout(dur))
+    internal_timeout::<SLEEP, _>(dur, future).map_err(|(dur, _)| Error::Timeout(dur))
 }
 
-pub async fn internal_timeout_at<SLEEP, T>(
+pub fn internal_timeout_at<SLEEP, T>(
     deadline: Instant,
     future: T,
-) -> Result<T::Output, (Instant, T)>
+) -> impl Future<Output = Result<T::Output, (Instant, T)>>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
-    match future::select(future, Box::pin(sleep_until::<SLEEP>(deadline))).await {
+    future::select(future, Box::pin(sleep_until::<SLEEP>(deadline))).map(move |either| match either
+    {
         Either::Left((output, _)) => Ok(output),
         Either::Right((_, future)) => Err((deadline, future)),
-    }
+    })
 }
 
-pub async fn timeout_at<SLEEP, T>(deadline: Instant, future: T) -> Result<T::Output, Error>
+pub fn timeout_at<SLEEP, T>(
+    deadline: Instant,
+    future: T,
+) -> impl Future<Output = Result<T::Output, Error>>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
     internal_timeout_at::<SLEEP, _>(deadline, future)
-        .await
         .map_err(|(instant, _)| Error::TimeoutAt(instant))
 }
 
