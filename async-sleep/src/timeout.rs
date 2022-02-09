@@ -1,4 +1,5 @@
 use core::{fmt, future::Future, time::Duration};
+use std::time::Instant;
 
 use futures_util::future::{self, Either};
 
@@ -26,6 +27,31 @@ where
         .map_err(|(err, _)| err)
 }
 
+pub async fn internal_timeout_at<SLEEP, T>(
+    deadline: Instant,
+    future: T,
+) -> Result<T::Output, (Error, T)>
+where
+    SLEEP: Sleepble,
+    T: Future + Unpin,
+{
+    let dur = deadline
+        .checked_duration_since(Instant::now())
+        .unwrap_or_default();
+
+    internal_timeout::<SLEEP, _>(dur, future).await
+}
+
+pub async fn timeout_at<SLEEP, T>(deadline: Instant, future: T) -> Result<T::Output, Error>
+where
+    SLEEP: Sleepble,
+    T: Future + Unpin,
+{
+    internal_timeout_at::<SLEEP, _>(deadline, future)
+        .await
+        .map_err(|(err, _)| err)
+}
+
 //
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -49,13 +75,15 @@ impl From<Error> for std::io::Error {
 mod tests {
     use super::*;
 
+    use std::time::Instant;
+
+    async fn foo() -> usize {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        0
+    }
+
     #[tokio::test]
     async fn test_timeout() {
-        async fn foo() -> usize {
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-            0
-        }
-
         //
         let now = std::time::Instant::now();
 
@@ -81,5 +109,24 @@ mod tests {
 
         let elapsed_dur = now.elapsed();
         assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+    }
+
+    #[tokio::test]
+    async fn test_timeout_at() {
+        //
+        let now = std::time::Instant::now();
+
+        match timeout_at::<crate::impl_tokio::Sleep, _>(
+            Instant::now() + Duration::from_millis(50),
+            Box::pin(foo()),
+        )
+        .await
+        {
+            Ok(v) => panic!("{:?}", v),
+            Err(Error::Timeout(dur)) => assert!(dur.as_millis() >= 49 && dur.as_millis() <= 50),
+        }
+
+        let elapsed_dur = now.elapsed();
+        assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
     }
 }

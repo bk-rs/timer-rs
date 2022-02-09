@@ -40,4 +40,7 @@ skip_feature_sets = [
     ["impl_tokio", "impl_async_timer"],
     ["impl_tokio", "impl_async_io"],
     ["impl_async_timer", "impl_async_io"],
+    # 
+    ["timeout", "impl_async_timer"],
+    ["timeout", "impl_async_io"],
 ]

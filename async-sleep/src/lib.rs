@@ -1,4 +1,5 @@
 use core::{future::Future, pin::Pin, time::Duration};
+use std::time::Instant;
 
 #[cfg(feature = "timeout")]
 pub mod timeout;
@@ -22,4 +23,15 @@ where
     SLEEP: Sleepble,
 {
     SLEEP::sleep(dur).wait().await
+}
+
+pub async fn sleep_until<SLEEP>(deadline: Instant)
+where
+    SLEEP: Sleepble,
+{
+    let dur = deadline
+        .checked_duration_since(Instant::now())
+        .unwrap_or_default();
+
+    sleep::<SLEEP>(dur).await
 }

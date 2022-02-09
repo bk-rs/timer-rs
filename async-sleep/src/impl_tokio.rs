@@ -19,13 +19,25 @@ impl Sleepble for Sleep {
 mod tests {
     use super::*;
 
-    use crate::sleep;
+    use std::time::Instant;
+
+    use crate::{sleep, sleep_until};
 
     #[tokio::test]
     async fn test_sleep() {
         let now = std::time::Instant::now();
 
         sleep::<Sleep>(Duration::from_millis(100)).await;
+
+        let elapsed_dur = now.elapsed();
+        assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+    }
+
+    #[tokio::test]
+    async fn test_sleep_until() {
+        let now = std::time::Instant::now();
+
+        sleep_until::<Sleep>(Instant::now() + Duration::from_millis(100)).await;
 
         let elapsed_dur = now.elapsed();
         assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
