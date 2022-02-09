@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use futures_util::future::{self, Either};
 
-use crate::{sleep, Sleepble};
+use crate::{sleep, sleep_until, Sleepble};
 
 //
 pub async fn internal_timeout<SLEEP, T>(dur: Duration, future: T) -> Result<T::Output, (Error, T)>
@@ -35,11 +35,10 @@ where
     SLEEP: Sleepble,
     T: Future + Unpin,
 {
-    let dur = deadline
-        .checked_duration_since(Instant::now())
-        .unwrap_or_default();
-
-    internal_timeout::<SLEEP, _>(dur, future).await
+    match future::select(future, Box::pin(sleep_until::<SLEEP>(deadline))).await {
+        Either::Left((output, _)) => Ok(output),
+        Either::Right((_, future)) => Err((Error::TimeoutAt(deadline), future)),
+    }
 }
 
 pub async fn timeout_at<SLEEP, T>(deadline: Instant, future: T) -> Result<T::Output, Error>
@@ -56,6 +55,7 @@ where
 #[derive(Debug, PartialEq)]
 pub enum Error {
     Timeout(Duration),
+    TimeoutAt(Instant),
 }
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -123,7 +123,11 @@ mod tests {
         .await
         {
             Ok(v) => panic!("{:?}", v),
-            Err(Error::Timeout(dur)) => assert!(dur.as_millis() >= 49 && dur.as_millis() <= 50),
+            Err(Error::Timeout(dur)) => panic!("{:?}", dur),
+            Err(Error::TimeoutAt(instant)) => {
+                let elapsed_dur = instant.elapsed();
+                assert!(elapsed_dur.as_millis() <= 3);
+            }
         }
 
         let elapsed_dur = now.elapsed();
