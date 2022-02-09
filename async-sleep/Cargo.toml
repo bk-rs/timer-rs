@@ -1,6 +1,6 @@
 [package]
 name = "async-sleep"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2021"
 description = "Async Sleep"
@@ -16,7 +16,7 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["impl_tokio", "impl_async_timer", "impl_async_io"]
+default = []
 
 impl_tokio = ["tokio"]
 impl_async_timer = ["async-timer"]
