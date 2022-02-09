@@ -5,15 +5,25 @@ use futures_util::future::{self, Either};
 use crate::{sleep, Sleepble};
 
 //
+pub async fn internal_timeout<SLEEP, T>(dur: Duration, future: T) -> Result<T::Output, (Error, T)>
+where
+    SLEEP: Sleepble,
+    T: Future + Unpin,
+{
+    match future::select(future, Box::pin(sleep::<SLEEP>(dur))).await {
+        Either::Left((output, _)) => Ok(output),
+        Either::Right((_, future)) => Err((Error::Timeout(dur), future)),
+    }
+}
+
 pub async fn timeout<SLEEP, T>(dur: Duration, future: T) -> Result<T::Output, Error>
 where
     SLEEP: Sleepble,
-    T: Future,
+    T: Future + Unpin,
 {
-    match future::select(Box::pin(future), Box::pin(sleep::<SLEEP>(dur))).await {
-        Either::Left((x, _)) => Ok(x),
-        Either::Right((_, _)) => Err(Error::Timeout(dur)),
-    }
+    internal_timeout::<SLEEP, _>(dur, future)
+        .await
+        .map_err(|(err, _)| err)
 }
 
 //
@@ -49,9 +59,11 @@ mod tests {
         //
         let now = std::time::Instant::now();
 
-        match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), foo()).await {
+        match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), Box::pin(foo()))
+            .await
+        {
+            Ok(v) => panic!("{:?}", v),
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
-            ret => panic!("{:?}", ret),
         }
 
         let elapsed_dur = now.elapsed();
@@ -60,9 +72,11 @@ mod tests {
         //
         let now = std::time::Instant::now();
 
-        match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(150), foo()).await {
-            Ok(x) => assert_eq!(x, 0),
-            ret => panic!("{:?}", ret),
+        match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(150), Box::pin(foo()))
+            .await
+        {
+            Ok(v) => assert_eq!(v, 0),
+            Err(err) => panic!("{:?}", err),
         }
 
         let elapsed_dur = now.elapsed();
