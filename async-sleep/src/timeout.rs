@@ -80,6 +80,8 @@ mod tests {
 
     use std::time::Instant;
 
+    use tokio::sync::oneshot;
+
     async fn foo() -> usize {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         0
@@ -87,6 +89,18 @@ mod tests {
 
     #[tokio::test]
     async fn test_timeout() {
+        //
+        let now = std::time::Instant::now();
+
+        let (_tx, rx) = oneshot::channel::<()>();
+        match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), rx).await {
+            Ok(v) => panic!("{:?}", v),
+            Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
+        }
+
+        let elapsed_dur = now.elapsed();
+        assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
+
         //
         let now = std::time::Instant::now();
 
