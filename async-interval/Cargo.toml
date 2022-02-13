@@ -16,15 +16,16 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["std"]
+default = ["std", "stream"]
 std = []
+stream = ["futures-util"]
 
-impl_tokio = ["tokio"]
-impl_async_timer = ["async-timer"]
-impl_async_io = ["async-io"]
+impl_tokio = ["tokio", "futures-util"]
+impl_async_timer = ["async-timer", "futures-util"]
+impl_async_io = ["async-io", "futures-util"]
 
 [dependencies]
-futures-util = { version = "0.3", default-features = false }
+futures-util = { version = "0.3", default-features = false, optional = true }
 
 tokio = { version = "1.16", default-features = false, features = ["time"], optional = true }
 async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
@@ -39,4 +40,7 @@ skip_feature_sets = [
     ["impl_tokio", "impl_async_timer"],
     ["impl_tokio", "impl_async_io"],
     ["impl_async_timer", "impl_async_io"],
+    # 
+    ["stream", "impl_async_timer"],
+    ["stream", "impl_async_io"],
 ]

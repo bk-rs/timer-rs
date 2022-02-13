@@ -11,17 +11,17 @@ impl Intervalable for Interval {
         Self::new(dur)
     }
 
+    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = ()> + Send + 'a>> {
+        Box::pin(self.wait())
+    }
+
     #[cfg(feature = "std")]
-    fn wait<'a>(
+    fn wait_for_std<'a>(
         &'a mut self,
     ) -> Pin<Box<dyn Future<Output = Option<std::time::Instant>> + Send + 'a>> {
         use futures_util::FutureExt as _;
 
         Box::pin(self.wait().map(|_| None))
-    }
-    #[cfg(not(feature = "std"))]
-    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = ()> + Send + 'a>> {
-        Box::pin(self.wait())
     }
 }
 
@@ -29,15 +29,49 @@ impl Intervalable for Interval {
 mod tests {
     use super::*;
 
-    use alloc::{vec, vec::Vec};
+    #[tokio::test]
+    async fn test_impl() {
+        #[cfg(feature = "std")]
+        let now = std::time::Instant::now();
 
-    use futures_util::StreamExt as _;
+        let mut interval = <Interval as Intervalable>::interval(Duration::from_millis(100));
 
-    use crate::intervalable_iter_stream;
+        //
+        interval.wait().await;
 
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        }
+
+        //
+        interval.wait().await;
+
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 200 && elapsed_dur.as_millis() <= 210);
+        }
+
+        #[cfg(feature = "std")]
+        {
+            assert!(interval.wait_for_std().await.is_none());
+
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 300 && elapsed_dur.as_millis() <= 315);
+        }
+    }
+
+    #[cfg(feature = "stream")]
     #[tokio::test]
     async fn test_intervalable_iter_stream() {
-        let st = intervalable_iter_stream(
+        use alloc::{vec, vec::Vec};
+
+        use futures_util::StreamExt as _;
+
+        //
+        let st = crate::intervalable_iter_stream(
             0..=2,
             <Interval as Intervalable>::interval(Duration::from_millis(100)),
         );
