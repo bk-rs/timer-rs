@@ -165,7 +165,7 @@ mod tests {
             Err(Error::Timeout(dur)) => panic!("{:?}", dur),
             Err(Error::TimeoutAt(instant)) => {
                 let elapsed_dur = instant.elapsed();
-                assert!(elapsed_dur.as_millis() <= 3);
+                assert!(elapsed_dur.as_millis() <= 5);
             }
         }
 
