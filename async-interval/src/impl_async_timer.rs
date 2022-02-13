@@ -1,8 +1,7 @@
+use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
-use std::time::Instant;
 
 pub use async_timer::Interval;
-use futures_util::FutureExt as _;
 
 use crate::Intervalable;
 
@@ -12,14 +11,25 @@ impl Intervalable for Interval {
         Self::new(dur)
     }
 
-    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = Option<Instant>> + Send + 'a>> {
+    #[cfg(feature = "std")]
+    fn wait<'a>(
+        &'a mut self,
+    ) -> Pin<Box<dyn Future<Output = Option<std::time::Instant>> + Send + 'a>> {
+        use futures_util::FutureExt as _;
+
         Box::pin(self.wait().map(|_| None))
+    }
+    #[cfg(not(feature = "std"))]
+    fn wait<'a>(&'a mut self) -> Pin<Box<dyn Future<Output = ()> + Send + 'a>> {
+        Box::pin(self.wait())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use alloc::{vec, vec::Vec};
 
     use futures_util::StreamExt as _;
 
@@ -32,11 +42,15 @@ mod tests {
             <Interval as Intervalable>::interval(Duration::from_millis(100)),
         );
 
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         assert_eq!(st.collect::<Vec<_>>().await, vec![0, 1, 2]);
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 300 && elapsed_dur.as_millis() <= 310);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 300 && elapsed_dur.as_millis() <= 310);
+        }
     }
 }

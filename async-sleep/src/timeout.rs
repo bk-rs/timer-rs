@@ -1,12 +1,14 @@
+use alloc::boxed::Box;
 use core::{fmt, future::Future, time::Duration};
-use std::time::Instant;
 
 use futures_util::{
     future::{self, Either},
     FutureExt as _, TryFutureExt as _,
 };
 
-use crate::{sleep, sleep_until, Sleepble};
+#[cfg(feature = "std")]
+use crate::sleep::sleep_until;
+use crate::{sleep::sleep, Sleepble};
 
 //
 pub fn internal_timeout<SLEEP, T>(
@@ -31,10 +33,11 @@ where
     internal_timeout::<SLEEP, _>(dur, future).map_err(|(dur, _)| Error::Timeout(dur))
 }
 
+#[cfg(feature = "std")]
 pub fn internal_timeout_at<SLEEP, T>(
-    deadline: Instant,
+    deadline: std::time::Instant,
     future: T,
-) -> impl Future<Output = Result<T::Output, (Instant, T)>>
+) -> impl Future<Output = Result<T::Output, (std::time::Instant, T)>>
 where
     SLEEP: Sleepble,
     T: Future + Unpin,
@@ -46,8 +49,9 @@ where
     })
 }
 
+#[cfg(feature = "std")]
 pub fn timeout_at<SLEEP, T>(
-    deadline: Instant,
+    deadline: std::time::Instant,
     future: T,
 ) -> impl Future<Output = Result<T::Output, Error>>
 where
@@ -62,15 +66,18 @@ where
 #[derive(Debug, PartialEq)]
 pub enum Error {
     Timeout(Duration),
-    TimeoutAt(Instant),
+    #[cfg(feature = "std")]
+    TimeoutAt(std::time::Instant),
 }
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
+#[cfg(feature = "std")]
 impl From<Error> for std::io::Error {
     fn from(_err: Error) -> std::io::Error {
         std::io::ErrorKind::TimedOut.into()
@@ -82,8 +89,6 @@ impl From<Error> for std::io::Error {
 mod tests {
     use super::*;
 
-    use std::time::Instant;
-
     use tokio::sync::oneshot;
 
     async fn foo() -> usize {
@@ -94,6 +99,7 @@ mod tests {
     #[tokio::test]
     async fn test_timeout() {
         //
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         let (_tx, rx) = oneshot::channel::<()>();
@@ -102,10 +108,14 @@ mod tests {
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
         }
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
+        }
 
         //
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), Box::pin(foo()))
@@ -115,10 +125,14 @@ mod tests {
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
         }
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 50 && elapsed_dur.as_millis() <= 55);
+        }
 
         //
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(150), Box::pin(foo()))
@@ -128,17 +142,21 @@ mod tests {
             Err(err) => panic!("{:?}", err),
         }
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        }
     }
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_timeout_at() {
         //
         let now = std::time::Instant::now();
 
         match timeout_at::<crate::impl_tokio::Sleep, _>(
-            Instant::now() + Duration::from_millis(50),
+            std::time::Instant::now() + Duration::from_millis(50),
             Box::pin(foo()),
         )
         .await

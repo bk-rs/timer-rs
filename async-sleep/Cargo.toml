@@ -16,8 +16,8 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["timeout"]
-
+default = ["std", "timeout"]
+std = []
 timeout = ["futures-util"]
 
 impl_tokio = ["tokio"]

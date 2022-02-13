@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
 
 pub use tokio::time::Sleep;
@@ -19,25 +20,27 @@ impl Sleepble for Sleep {
 mod tests {
     use super::*;
 
-    use std::time::Instant;
-
-    use crate::{sleep, sleep_until};
-
     #[tokio::test]
     async fn test_sleep() {
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
-        sleep::<Sleep>(Duration::from_millis(100)).await;
+        crate::sleep::sleep::<Sleep>(Duration::from_millis(100)).await;
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        }
     }
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_sleep_until() {
         let now = std::time::Instant::now();
 
-        sleep_until::<Sleep>(Instant::now() + Duration::from_millis(100)).await;
+        crate::sleep::sleep_until::<Sleep>(std::time::Instant::now() + Duration::from_millis(100))
+            .await;
 
         let elapsed_dur = now.elapsed();
         assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);

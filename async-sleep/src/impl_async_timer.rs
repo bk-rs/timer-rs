@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
 
 pub use async_timer::timer::Platform as PlatformTimer;
@@ -23,11 +24,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_sleep() {
+        #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
         sleep::<PlatformTimer>(Duration::from_millis(100)).await;
 
-        let elapsed_dur = now.elapsed();
-        assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        #[cfg(feature = "std")]
+        {
+            let elapsed_dur = now.elapsed();
+            assert!(elapsed_dur.as_millis() >= 100 && elapsed_dur.as_millis() <= 105);
+        }
     }
 }
