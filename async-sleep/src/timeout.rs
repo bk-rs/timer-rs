@@ -87,22 +87,23 @@ impl From<Error> for std::io::Error {
 #[cfg(feature = "impl_tokio")]
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
-    use tokio::sync::oneshot;
-
+    #[allow(dead_code)]
     async fn foo() -> usize {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         0
     }
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_timeout() {
         //
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
-        let (_tx, rx) = oneshot::channel::<()>();
+        let (_tx, rx) = tokio::sync::oneshot::channel::<()>();
         match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), rx).await {
             Ok(v) => panic!("{:?}", v),
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),

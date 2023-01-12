@@ -28,8 +28,10 @@ impl Intervalable for Interval {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_impl() {
         #[cfg(feature = "std")]
@@ -64,7 +66,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "stream")]
+    #[cfg(all(feature = "std", feature = "stream"))]
     #[tokio::test]
     async fn test_intervalable_iter_stream() {
         use alloc::{vec, vec::Vec};
@@ -89,7 +91,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "stream")]
+    #[cfg(all(feature = "std", feature = "stream"))]
     #[tokio::test]
     async fn test_intervalable_repeat_stream() {
         use alloc::{vec, vec::Vec};
@@ -114,7 +116,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "stream")]
+    #[cfg(all(feature = "std", feature = "stream"))]
     #[tokio::test]
     async fn test_intervalable_repeat_with_stream() {
         use alloc::{vec, vec::Vec};

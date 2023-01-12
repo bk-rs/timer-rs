@@ -18,8 +18,10 @@ impl Sleepble for Sleep {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_sleep() {
         #[cfg(feature = "std")]

@@ -19,16 +19,16 @@ impl Sleepble for Timer {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
-    use crate::sleep;
-
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_sleep() {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
-        sleep::<Timer>(Duration::from_millis(100)).await;
+        crate::sleep::sleep::<Timer>(Duration::from_millis(100)).await;
 
         #[cfg(feature = "std")]
         {
