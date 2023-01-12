@@ -1,5 +1,5 @@
 use alloc::boxed::Box;
-use core::{fmt, future::Future, time::Duration};
+use core::{future::Future, time::Duration};
 
 use futures_util::{
     future::{self, Either},
@@ -69,9 +69,9 @@ pub enum Error {
     #[cfg(feature = "std")]
     TimeoutAt(std::time::Instant),
 }
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{self:?}")
     }
 }
 #[cfg(feature = "std")]
@@ -105,7 +105,7 @@ mod tests {
 
         let (_tx, rx) = tokio::sync::oneshot::channel::<()>();
         match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), rx).await {
-            Ok(v) => panic!("{:?}", v),
+            Ok(v) => panic!("{v:?}"),
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
         }
 
@@ -122,7 +122,7 @@ mod tests {
         match timeout::<crate::impl_tokio::Sleep, _>(Duration::from_millis(50), Box::pin(foo()))
             .await
         {
-            Ok(v) => panic!("{:?}", v),
+            Ok(v) => panic!("{v:?}"),
             Err(err) => assert_eq!(err, Error::Timeout(Duration::from_millis(50))),
         }
 
@@ -140,7 +140,7 @@ mod tests {
             .await
         {
             Ok(v) => assert_eq!(v, 0),
-            Err(err) => panic!("{:?}", err),
+            Err(err) => panic!("{err:?}"),
         }
 
         #[cfg(feature = "std")]
@@ -162,8 +162,8 @@ mod tests {
         )
         .await
         {
-            Ok(v) => panic!("{:?}", v),
-            Err(Error::Timeout(dur)) => panic!("{:?}", dur),
+            Ok(v) => panic!("{v:?}"),
+            Err(Error::Timeout(dur)) => panic!("{dur:?}"),
             Err(Error::TimeoutAt(instant)) => {
                 let elapsed_dur = instant.elapsed();
                 assert!(elapsed_dur.as_millis() <= 5);
