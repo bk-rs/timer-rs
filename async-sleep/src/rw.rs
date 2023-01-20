@@ -23,7 +23,7 @@ pub trait AsyncReadWithTimeoutExt: AsyncRead {
     where
         Self: Unpin,
     {
-        ReadWithTimeout::new(self, buf, SLEEP::sleep(dur).wait())
+        ReadWithTimeout::new::<SLEEP>(self, buf, dur)
     }
 }
 
@@ -34,21 +34,29 @@ impl<R: AsyncRead + ?Sized> AsyncReadWithTimeoutExt for R {}
 pub struct ReadWithTimeout<'a, R: ?Sized> {
     reader: &'a mut R,
     buf: &'a mut [u8],
+    pub dur: Duration,
     sleepble_wait_box_future: SleepbleWaitBoxFuture,
+}
+
+impl<'a, R: ?Sized + core::fmt::Debug> core::fmt::Debug for ReadWithTimeout<'a, R> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ReadWithTimeout")
+            .field("reader", &self.reader)
+            .field("buf", &self.buf)
+            .field("dur", &self.dur)
+            .finish()
+    }
 }
 
 impl<R: ?Sized + Unpin> Unpin for ReadWithTimeout<'_, R> {}
 
 impl<'a, R: AsyncRead + ?Sized + Unpin> ReadWithTimeout<'a, R> {
-    fn new(
-        reader: &'a mut R,
-        buf: &'a mut [u8],
-        sleepble_wait_box_future: SleepbleWaitBoxFuture,
-    ) -> Self {
+    pub fn new<SLEEP: Sleepble>(reader: &'a mut R, buf: &'a mut [u8], dur: Duration) -> Self {
         Self {
             reader,
             buf,
-            sleepble_wait_box_future,
+            dur,
+            sleepble_wait_box_future: SLEEP::sleep(dur).wait(),
         }
     }
 }
@@ -81,7 +89,7 @@ pub trait AsyncWriteWithTimeoutExt: AsyncWrite {
     where
         Self: Unpin,
     {
-        WriteWithTimeout::new(self, buf, SLEEP::sleep(dur).wait())
+        WriteWithTimeout::new::<SLEEP>(self, buf, dur)
     }
 }
 
@@ -92,21 +100,29 @@ impl<W: AsyncWrite + ?Sized> AsyncWriteWithTimeoutExt for W {}
 pub struct WriteWithTimeout<'a, W: ?Sized> {
     writer: &'a mut W,
     buf: &'a [u8],
+    pub dur: Duration,
     sleepble_wait_box_future: SleepbleWaitBoxFuture,
+}
+
+impl<'a, W: ?Sized + core::fmt::Debug> core::fmt::Debug for WriteWithTimeout<'a, W> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WriteWithTimeout")
+            .field("writer", &self.writer)
+            .field("buf", &self.buf)
+            .field("dur", &self.dur)
+            .finish()
+    }
 }
 
 impl<W: ?Sized + Unpin> Unpin for WriteWithTimeout<'_, W> {}
 
 impl<'a, W: AsyncWrite + ?Sized + Unpin> WriteWithTimeout<'a, W> {
-    fn new(
-        writer: &'a mut W,
-        buf: &'a [u8],
-        sleepble_wait_box_future: SleepbleWaitBoxFuture,
-    ) -> Self {
+    pub fn new<SLEEP: Sleepble>(writer: &'a mut W, buf: &'a [u8], dur: Duration) -> Self {
         Self {
             writer,
             buf,
-            sleepble_wait_box_future,
+            dur,
+            sleepble_wait_box_future: SLEEP::sleep(dur).wait(),
         }
     }
 }
