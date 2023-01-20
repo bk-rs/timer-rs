@@ -19,20 +19,24 @@ all-features = true
 default = ["std", "timeout"]
 std = []
 timeout = ["futures-util"]
+rw = ["futures-util/io", "std"]
 
 impl_tokio = ["tokio"]
 impl_async_timer = ["async-timer"]
 impl_async_io = ["async-io", "futures-util"]
 
 [dependencies]
-futures-util = { version = "0.3", default-features = false, optional = true }
+futures-util = { version = "0.3", default-features = false, features = ["alloc"], optional = true }
 
 tokio = { version = "1", default-features = false, features = ["time"], optional = true }
 async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
 async-io = { version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "net"] }
+async-compat = { version = "0.2" }
+
+futures-lite = { version = "1" }
 
 [package.metadata.cargo-all-features]
 skip_optional_dependencies = true
@@ -43,4 +47,7 @@ skip_feature_sets = [
     # 
     ["timeout", "impl_async_timer"],
     ["timeout", "impl_async_io"],
+    # 
+    ["io", "impl_async_timer"],
+    ["io", "impl_async_io"],
 ]
