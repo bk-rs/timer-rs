@@ -1,9 +1,9 @@
 use alloc::boxed::Box;
-use core::{future::Future, pin::Pin, time::Duration};
+use core::time::Duration;
 
 pub use async_timer::timer::Platform as PlatformTimer;
 
-use crate::Sleepble;
+use crate::{Sleepble, SleepbleWaitBoxFuture};
 
 //
 impl Sleepble for PlatformTimer {
@@ -11,7 +11,7 @@ impl Sleepble for PlatformTimer {
         Self::new(dur)
     }
 
-    fn wait(self) -> Pin<Box<dyn Future<Output = ()> + Send + 'static>> {
+    fn wait(self) -> SleepbleWaitBoxFuture {
         Box::pin(self)
     }
 }
