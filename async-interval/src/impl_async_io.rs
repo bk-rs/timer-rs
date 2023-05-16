@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
 
-pub use async_io::Timer;
+pub use async_io::{Timer, Timer as AsyncIoTimer};
 use futures_util::StreamExt as _;
 
 use crate::Intervalable;

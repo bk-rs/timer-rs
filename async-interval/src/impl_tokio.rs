@@ -2,7 +2,7 @@ use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
 
 use futures_util::FutureExt as _;
-pub use tokio::time::Interval;
+pub use tokio::time::{Interval, Interval as TokioTimeInterval};
 
 use crate::Intervalable;
 

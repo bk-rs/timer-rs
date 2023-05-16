@@ -20,10 +20,16 @@ pub trait Intervalable {
 //
 #[cfg(feature = "impl_async_io")]
 pub mod impl_async_io;
+#[cfg(feature = "impl_async_io")]
+pub use impl_async_io::AsyncIoTimer;
 #[cfg(feature = "impl_async_timer")]
 pub mod impl_async_timer;
+#[cfg(feature = "impl_async_timer")]
+pub use impl_async_timer::AsyncTimerInterval;
 #[cfg(feature = "impl_tokio")]
 pub mod impl_tokio;
+#[cfg(feature = "impl_tokio")]
+pub use impl_tokio::TokioTimeInterval;
 
 //
 #[cfg(feature = "stream")]

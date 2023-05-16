@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, time::Duration};
 
-pub use async_timer::Interval;
+pub use async_timer::{Interval, Interval as AsyncTimerInterval};
 
 use crate::Intervalable;
 
