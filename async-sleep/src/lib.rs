@@ -20,10 +20,16 @@ pub trait Sleepble {
 //
 #[cfg(feature = "impl_async_io")]
 pub mod impl_async_io;
+#[cfg(feature = "impl_async_io")]
+pub use impl_async_io::AsyncIoTimer;
 #[cfg(feature = "impl_async_timer")]
 pub mod impl_async_timer;
+#[cfg(feature = "impl_async_timer")]
+pub use impl_async_timer::AsyncTimerPlatform;
 #[cfg(feature = "impl_tokio")]
 pub mod impl_tokio;
+#[cfg(feature = "impl_tokio")]
+pub use impl_tokio::TokioTimeSleep;
 
 #[cfg(feature = "rw")]
 pub mod rw;

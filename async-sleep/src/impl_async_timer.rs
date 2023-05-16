@@ -1,12 +1,12 @@
 use alloc::boxed::Box;
 use core::time::Duration;
 
-pub use async_timer::timer::Platform as PlatformTimer;
+pub use async_timer::timer::{Platform, Platform as AsyncTimerPlatform};
 
 use crate::{Sleepble, SleepbleWaitBoxFuture};
 
 //
-impl Sleepble for PlatformTimer {
+impl Sleepble for Platform {
     fn sleep(dur: Duration) -> Self {
         Self::new(dur)
     }
@@ -27,7 +27,7 @@ mod tests {
         #[cfg(feature = "std")]
         let now = std::time::Instant::now();
 
-        crate::sleep::sleep::<PlatformTimer>(Duration::from_millis(100)).await;
+        crate::sleep::sleep::<Platform>(Duration::from_millis(100)).await;
 
         #[cfg(feature = "std")]
         {

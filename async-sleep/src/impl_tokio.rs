@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use core::time::Duration;
 
-pub use tokio::time::Sleep;
+pub use tokio::time::{Sleep, Sleep as TokioTimeSleep};
 
 use crate::{Sleepble, SleepbleWaitBoxFuture};
 
