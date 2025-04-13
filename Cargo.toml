@@ -1,5 +1,8 @@
 [workspace]
 members = [
+    # 
     "async-interval",
+    # 
     "async-sleep",
 ]
+resolver = "2"

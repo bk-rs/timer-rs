@@ -38,7 +38,7 @@ pub struct ReadWithTimeout<'a, R: ?Sized> {
     sleepble_wait_box_future: SleepbleWaitBoxFuture,
 }
 
-impl<'a, R: ?Sized + core::fmt::Debug> core::fmt::Debug for ReadWithTimeout<'a, R> {
+impl<R: ?Sized + core::fmt::Debug> core::fmt::Debug for ReadWithTimeout<'_, R> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("ReadWithTimeout")
             .field("reader", &self.reader)
@@ -104,7 +104,7 @@ pub struct WriteWithTimeout<'a, W: ?Sized> {
     sleepble_wait_box_future: SleepbleWaitBoxFuture,
 }
 
-impl<'a, W: ?Sized + core::fmt::Debug> core::fmt::Debug for WriteWithTimeout<'a, W> {
+impl<W: ?Sized + core::fmt::Debug> core::fmt::Debug for WriteWithTimeout<'_, W> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("WriteWithTimeout")
             .field("writer", &self.writer)
