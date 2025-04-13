@@ -1,6 +1,6 @@
 [package]
 name = "async-sleep"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["vkill <vkill.net@gmail.com>"]
 edition = "2021"
 description = "Async Sleep"
