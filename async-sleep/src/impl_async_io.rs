@@ -56,7 +56,7 @@ mod tests {
         };
 
         #[test]
-        fn simple() -> Result<(), Box<dyn std::error::Error>> {
+        fn simple() -> Result<(), Box<dyn core::error::Error>> {
             block_on(async {
                 let listener = TcpListener::bind("127.0.0.1:0")?;
 

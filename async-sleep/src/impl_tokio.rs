@@ -114,7 +114,7 @@ mod tests {
         };
 
         #[test]
-        fn simple() -> Result<(), Box<dyn std::error::Error>> {
+        fn simple() -> Result<(), Box<dyn core::error::Error>> {
             let rt = Runtime::new().unwrap();
 
             let ret = rt.block_on(async {
@@ -151,7 +151,7 @@ mod tests {
                 assert_eq!(err.kind(), IoErrorKind::TimedOut);
                 assert_eq!(err.to_string(), "read timeout");
 
-                Result::<(), Box<dyn std::error::Error>>::Ok(())
+                Result::<(), Box<dyn core::error::Error>>::Ok(())
             });
 
             match ret {
