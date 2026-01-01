@@ -1,4 +1,4 @@
-use futures_util::{stream, Stream};
+use futures_util::{Stream, stream};
 
 use crate::Intervalable;
 

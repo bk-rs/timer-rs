@@ -2,13 +2,13 @@ use alloc::boxed::Box;
 use core::{future::Future, time::Duration};
 
 use futures_util::{
-    future::{self, Either},
     FutureExt as _, TryFutureExt as _,
+    future::{self, Either},
 };
 
 #[cfg(feature = "std")]
 use crate::sleep::sleep_until;
-use crate::{sleep::sleep, Sleepble};
+use crate::{Sleepble, sleep::sleep};
 
 //
 pub fn internal_timeout<SLEEP, T>(
